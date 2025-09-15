@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mishra Malware — C++ x Turing Memes</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060A0F;
+    --panel: #0C1118;
+    --ink: #D7FFE5;
+    --muted: #7ad0a6;
+    --accent: #00FFC6;
+    --bad: #ff5d73;
+    --radius: 12px;
+    --shadow: 0 5px 15px rgba(0,0,0,.35);
+  }
+  
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: "JetBrains Mono", monospace;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+    padding: 16px;
+  }
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+  }
+  
+  header {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 20px;
+    background: var(--panel);
+    border-radius: var(--radius);
+    border: 1px solid #152233;
+    margin-bottom: 10px;
+  }
+  
+  h1 {
+    font-weight: 800;
+    font-size: 2.5rem;
+    margin-bottom: 8px;
+    text-shadow: 0 0 15px rgba(0,255,198,.3);
+  }
+  
+  .tagline {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-bottom: 16px;
+  }
+  
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  
+  button {
+    background: linear-gradient(180deg, #0f1822, #0a1119);
+    border: 1px solid #12202e;
+    color: var(--ink);
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+  }
+  
+  button:hover {
+    border-color: #1b3246;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  }
+  
+  .card {
+    background: linear-gradient(160deg, #0b1220, #0a0f17);
+    border: 1px solid #152233;
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed #1a2a3b;
+  }
+  
+  .pill {
+    font-size: 0.75rem;
+    background: #0d1724;
+    border: 1px solid #173149;
+    color: var(--muted);
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+  
+  .card-content {
+    flex-grow: 1;
+    margin-bottom: 16px;
+  }
+  
+  .meme-text {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  
+  .subtext {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-top: 8px;
+  }
+  
+  .card-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: auto;
+  }
+  
+  .generator-card {
+    grid-column: 1 / -1;
+  }
+  
+  .input-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  
+  input[type="text"] {
+    flex-grow: 1;
+    padding: 10px 14px;
+    background: #0a121c;
+    border: 1px solid #142233;
+    color: var(--ink);
+    border-radius: 8px;
+    font-family: inherit;
+    outline: none;
+  }
+  
+  input[type="text"]:focus {
+    border-color: var(--accent);
+  }
+  
+  .code {
+    background: #05090f;
+    border: 1px solid #132131;
+    border-radius: 8px;
+    padding: 12px;
+    overflow: auto;
+    font-size: 0.9rem;
+    margin: 12px 0;
+  }
+  
+  .tape-container {
+    display: flex;
+    overflow-x: auto;
+    margin: 12px 0;
+    padding: 5px 0;
+  }
+  
+  .tape-cell {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #2a4869;
+    margin: 0 2px;
+    font-size: 14px;
+    background: #0a1522;
+    position: relative;
+  }
+  
+  .tape-cell.active {
+    border: 2px solid var(--accent);
+    box-shadow: 0 0 8px rgba(0,255,198,0.3);
+  }
+  
+  .tape-cell.active::after {
+    content: '↓';
+    position: absolute;
+    bottom: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--accent);
+    font-size: 12px;
+  }
+  
+  footer {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 20px;
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-top: 10px;
+  }
+  
+  @media (max-width: 768px) {
+    .container {
+      grid-template-columns: 1fr;
+    }
+    
+    .controls {
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .input-group {
+      flex-direction: column;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Mishra Malware</h1>
+      <p class="tagline">"In a world controlled by software, bend it until it apologizes."</p>
+      <div class="controls">
+        <button id="shuffleAll">Shuffle All Memes</button>
+        <button id="newCustom">Generate New Meme</button>
+      </div>
+    </header>
+
+    <div class="card generator-card">
+      <div class="card-header">
+        <span class="pill">Meme Generator</span>
+      </div>
+      <div class="card-content">
+        <div class="meme-text" id="genText">/* Click "Generate New Meme" for C++ and Turing nonsense */</div>
+        <div class="input-group">
+          <input id="customTop" type="text" placeholder="Custom text (optional)">
+          <button id="applyTop">Apply</button>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button id="copyGen">Copy</button>
+      </div>
+    </div>
+
+    <!-- Meme Cards -->
+    <div class="card">
+      <div class="card-header">
+        <span class="pill">C++</span>
+        <span class="subtext">UB Appreciation</span>
+      </div>
+      <div class="card-content">
+        <div class="meme-text">
+          <strong>Interviewer:</strong> "What's your greatest strength?"<br>
+          <strong>Me:</strong> "Undefined Behavior. It's not a bug if physics can't prove it."
+        </div>
+        <div class="subtext">(* Compiler: emits a black hole *)</div>
+      </div>
+      <div class="card-actions">
+        <button class="reshuffle">↻ Shuffle</button>
+        <button class="copy">Copy</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="pill">C++</span>
+        <span class="subtext">Template Therapy</span>
+      </div>
+      <div class="card-content">
+        <div class="meme-text">
+          Therapist: "Variadic templates aren't real, they can't hurt you."<br>
+          Variadic templates: <code>template&lt;class... Pain&gt;</code>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="reshuffle">↻ Shuffle</button>
+        <button class="copy">Copy</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="pill">C++</span>
+        <span class="subtext">Pointers</span>
+      </div>
+      <div class="card-content">
+        <div class="meme-text">
+          New dev: "Where's the bug?"<br>
+          Senior dev: "*points*"<br>
+          C++: "Which pointer type of 'points' exactly?"
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="reshuffle">↻ Shuffle</button>
+        <button class="copy">Copy</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="pill">Turing</span>
+        <span class="subtext">Halting Problem</span>
+      </div>
+      <div class="card-content">
+        <div class="meme-text">
+          Boss: "Can you ship a tool that detects infinite loops?"<br>
+          Me: "Sure, right after I finish my perpetual motion machine."
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="reshuffle">↻ Shuffle</button>
+        <button class="copy">Copy</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="pill">Turing</span>
+        <span class="subtext">Tape Life</span>
+      </div>
+      <div class="card-content">
+        <div class="meme-text">
+          Dating profile: "Enjoys long walks on an infinite tape. Head moves L/R. Will not halt."
+        </div>
+        <div class="subtext">Swipe ⬅︎ or ➡︎ — same energy.</div>
+      </div>
+      <div class="card-actions">
+        <button class="reshuffle">↻ Shuffle</button>
+        <button class="copy">Copy</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="pill">Malware</span>
+        <span class="subtext">OpSec</span>
+      </div>
+      <div class="card-content">
+        <div class="meme-text">
+          "It's not malware, it's an aggressive feature rollout with boundary-pushing persistence."
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="reshuffle">↻ Shuffle</button>
+        <button class="copy">Copy</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="pill">C++</span>
+        <span class="subtext">Compiler</span>
+      </div>
+      <div class="card-content">
+        <pre class="code">
+// Mishra Malware: Code as art & incident
+#include &lt;iostream&gt;
+template&lt;typename T&gt; 
+void bend(T&& world) { 
+  std::cout &lt;&lt; "software bent\n"; 
+}
+int main() {
+  bend(42);
+  return 0;
+}</pre>
+        <div class="subtext" id="build">Status: waiting for chaos.</div>
+      </div>
+      <div class="card-actions">
+        <button id="compile">Compile</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="pill">Turing</span>
+        <span class="subtext">Tape Simulator</span>
+      </div>
+      <div class="card-content">
+        <div class="tape-container" id="tapeContainer"></div>
+        <div class="subtext" id="tstate">q0: write 1, move ➡︎, repeat</div>
+      </div>
+      <div class="card-actions">
+        <button id="step">Step</button>
+        <button id="reset">Reset</button>
+      </div>
+    </div>
+
+    <footer>
+      © Mishra Malware — C++ templates, infinite tapes, and sarcasm to trigger static analyzers.
+    </footer>
+  </div>
+
+  <script>
+  /* ---------- Meme generator ---------- */
+  const setups = [
+    "C++ dev after 3 hours debugging:",
+    "Template metaprogrammer meeting daylight:",
+    "Pointer arithmetic explained:",
+    "Undefined Behavior interviewing me:",
+    "Turing machine at stand-up:",
+    "Malware but make it enterprise:",
+    "Unit tests vs. race conditions:",
+  ];
+  
+  const punches = [
+    "“It works on my OS. Which one? The imaginary one.”",
+    "“If it compiles, ship it. If it runs, run.”",
+    "“Left, Right, Left… still off by one.”",
+    "“Halt? Never heard of her.”",
+    "“const correctness is a lifestyle, not a phase.”",
+    "“Senior dev approved: // NOLINT(ethics)”",
+    "“Segfault is just the kernel's way of giving feedback.”",
+    "“Tape is infinite; patience is not.”",
+    "“Templates so generic they filed for abstraction.”"
+  ];
+  
+  function random(a) { return a[Math.floor(Math.random() * a.length)]; }
+  
+  const genText = document.getElementById('genText');
+  function generate() { 
+    genText.textContent = random(setups) + " " + random(punches); 
+  }
+  
+  document.getElementById('newCustom').onclick = generate;
+  document.getElementById('copyGen').onclick = () => {
+    navigator.clipboard.writeText(genText.textContent);
+    alert('Copied to clipboard!');
+  };
+  
+  document.getElementById('applyTop').onclick = () => {
+    const top = document.getElementById('customTop').value.trim();
+    if (top) genText.textContent = top + " " + random(punches);
+  };
+  
+  /* ---------- Per-card actions ---------- */
+  document.querySelectorAll('.reshuffle').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const card = e.target.closest('.card');
+      const text = card.querySelector('.meme-text');
+      text.innerHTML = random(setups) + " " + random(punches);
+    });
+  });
+  
+  document.querySelectorAll('.copy').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const card = e.target.closest('.card');
+      const text = card.querySelector('.meme-text').innerText;
+      navigator.clipboard.writeText(text);
+      alert('Copied to clipboard!');
+    });
+  });
+  
+  document.getElementById('shuffleAll').onclick = () => {
+    document.querySelectorAll('.card .reshuffle').forEach(b => b.click());
+    generate();
+  };
+  
+  /* ---------- Fake compiler ---------- */
+  const buildOut = document.getElementById('build');
+  const statuses = [
+    ['Optimizing with -O¯\\_(ツ)_/¯'],
+    ['warning: performance depends on moon phase'],
+    ['link success: produced artifact "bent_world"'],
+    ['note: undefined behavior detected; results: "fun"']
+  ];
+  
+  document.getElementById('compile').onclick = async () => {
+    buildOut.innerHTML = 'Compiling…';
+    for (const [msg] of statuses) {
+      await new Promise(r => setTimeout(r, 600));
+      buildOut.innerHTML = msg;
+    }
+  };
+  
+  /* ---------- Turing tape ---------- */
+  const tapeContainer = document.getElementById('tapeContainer');
+  let tape = Array(15).fill('0');
+  let head = 7;
+  let ones = 0;
+  let halted = false;
+  
+  function renderTape() {
+    tapeContainer.innerHTML = '';
+    tape.forEach((value, index) => {
+      const cell = document.createElement('div');
+      cell.className = `tape-cell ${index === head ? 'active' : ''}`;
+      cell.textContent = value;
+      tapeContainer.appendChild(cell);
+    });
+  }
+  
+  function step() {
+    if (halted) return;
+    if (ones >= 10) { 
+      halted = true; 
+      document.getElementById('tstate').textContent = "Machine halts. PM asks for more features anyway."; 
+      return; 
+    }
+    
+    tape[head] = '1'; 
+    ones++;
+    head++; 
+    
+    if (head >= tape.length) { 
+      tape.push('0'); 
+    }
+    
+    renderTape();
+    document.getElementById('tstate').textContent = `Written: ${ones}, Head: ${head-7}`;
+  }
+  
+  document.getElementById('step').onclick = step;
+  document.getElementById('reset').onclick = () => { 
+    tape = Array(15).fill('0'); 
+    head = 7; 
+    ones = 0; 
+    halted = false; 
+    document.getElementById('tstate').textContent = "q0: write 1, move ➡︎, repeat"; 
+    renderTape(); 
+  };
+  
+  // Initialize
+  renderTape();
+  </script>
+</body>
+</html>
